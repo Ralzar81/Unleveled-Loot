@@ -1,0 +1,12 @@
+{
+    "ModTitle": "Unleveled Loot",
+    "ModVersion": "0.1",
+    "ModAuthor": "Ralzar",
+    "DFUnity_Version": "0.10.26",
+    "ModDescription": "Makes loot not scale to your level.",
+    "GUID": "1388308f-f430-4e43-8a9b-fa4d9b1fbbf6",
+    "Files": [
+        "Assets/Game/Mods/Unleveled Loot/UnleveledLoot.cs",
+        "Assets/Game/Mods/Unleveled Loot/UnleveledLoot.dfmod.json"
+    ]
+}
