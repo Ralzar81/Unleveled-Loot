@@ -120,7 +120,7 @@ namespace UnleveledLootMod
                     newItems.AddItem(newWpn);
                     lootStack.RemoveItem(item);
                 }
-                else if (item.ItemGroup == ItemGroups.Armor)
+                else if (item.ItemGroup == ItemGroups.Armor && item.nativeMaterialValue != (int)ArmorMaterialTypes.Leather)
                 {
                     DaggerfallUnityItem newArm = ArmMatChanger(item, enemyEntityID);
                     newItems.AddItem(newArm);
@@ -222,7 +222,7 @@ namespace UnleveledLootMod
 
         private static ArmorMaterialTypes ArmMatSelector(int enemyEntityID)
         {
-            ArmorMaterialTypes material = ArmorMaterialTypes.Iron;
+            ArmorMaterialTypes material = ArmorMaterialTypes.Chain;
             int roll = UnityEngine.Random.Range(0, 101) + (luckMod - 5);
             if (enemyEntityID == (int)MobileTypes.Orc && roll > 95)
             {
@@ -264,18 +264,23 @@ namespace UnleveledLootMod
             {
                 material = ArmorMaterialTypes.Dwarven;
             }
-            else if (roll > 74)
+            else if (roll > 75)
             {
                 material = ArmorMaterialTypes.Elven;
             }
-            else if (roll > 66)
+            else if (roll > 78)
             {
                 material = ArmorMaterialTypes.Silver;
             }
-            else if (roll > 31)
+            else if (roll > 70)
             {
                 material = ArmorMaterialTypes.Steel;
             }
+            else if (roll > 25)
+            {
+                material = ArmorMaterialTypes.Iron;
+            }
+
             return material;
         }
 
