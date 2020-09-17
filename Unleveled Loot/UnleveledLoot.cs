@@ -1,27 +1,14 @@
 using DaggerfallConnect;
 using DaggerfallWorkshop.Game;
-using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.Items;
-using DaggerfallWorkshop.Game.MagicAndEffects;
+using DaggerfallWorkshop.Game.Formulas;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
-using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
+using DaggerfallWorkshop;
 using UnityEngine;
 using System;
-using DaggerfallWorkshop;
-using DaggerfallConnect.Arena2;
-using DaggerfallWorkshop.Utility;
-using DaggerfallWorkshop.Game.UserInterfaceWindows;
-using DaggerfallWorkshop.Game.Serialization;
 using System.Collections.Generic;
-using DaggerfallWorkshop.Game.UserInterface;
-using DaggerfallConnect.Utility;
-using System.Collections;
-using DaggerfallConnect.Save;
-using DaggerfallWorkshop.Game.Formulas;
-using DaggerfallWorkshop.Game.Player;
-using DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects;
-using DaggerfallWorkshop.Game.Guilds;
+
 
 namespace UnleveledLootMod
 {
@@ -223,7 +210,6 @@ namespace UnleveledLootMod
             //increased chance of orcish when in orsinium
             if ((region == (int)DaggerfallRegions.OrsiniumArea) && (matRoll) > 70)
             {
-                Debug.Log("[Unleveled Loot] Orsinium Shop");
                 int roll = UnityEngine.Random.Range(0, 90) + luckMod;
                 if (roll > 90)
                     return WeaponMaterialTypes.Orcish;
@@ -233,35 +219,35 @@ namespace UnleveledLootMod
             {
                 weaponMaterial = WeaponMaterialTypes.Daedric;
             }
-            else if (matRoll > 98)
+            else if (matRoll > 97)
             {
                 weaponMaterial = WeaponMaterialTypes.Orcish;
             }
-            else if (matRoll > 90)
+            else if (matRoll > 95)
             {
                 weaponMaterial = WeaponMaterialTypes.Ebony;
             }
-            else if (matRoll > 85)
+            else if (matRoll > 92)
             {
                 weaponMaterial = WeaponMaterialTypes.Adamantium;
             }
-            else if (matRoll > 70)
+            else if (matRoll > 88)
             {
                 weaponMaterial = WeaponMaterialTypes.Mithril;
             }
-            else if (matRoll > 65)
+            else if (matRoll > 80)
             {
                 weaponMaterial = WeaponMaterialTypes.Dwarven;
             }
-            else if (matRoll > 60)
+            else if (matRoll > 70)
             {
                 weaponMaterial = WeaponMaterialTypes.Elven;
             }
-            else if (matRoll > 55)
+            else if (matRoll > 64)
             {
                 weaponMaterial = WeaponMaterialTypes.Silver;
             }
-            else if (matRoll < 1)
+            else if (matRoll < 10)
             {
                 weaponMaterial = WeaponMaterialTypes.Iron;
             }
@@ -275,8 +261,8 @@ namespace UnleveledLootMod
             bool addDaedricItem = false;
             if ((enemyEntityID == (int)MobileTypes.DaedraLord && roll > 70)
                 || (enemyEntityID == (int)MobileTypes.DaedraSeducer && roll > 80)
-                || (enemyEntityID == (int)MobileTypes.Daedroth && roll > 95)
-                || ((enemyEntityID == (int)MobileTypes.FireDaedra || enemyEntityID == (int)MobileTypes.FrostDaedra) && roll > 90))
+                || ((enemyEntityID == (int)MobileTypes.FireDaedra || enemyEntityID == (int)MobileTypes.FrostDaedra) && roll > 90)
+                || (enemyEntityID == (int)MobileTypes.Daedroth && roll > 95))
             {
                 addDaedricItem = true;
             }
