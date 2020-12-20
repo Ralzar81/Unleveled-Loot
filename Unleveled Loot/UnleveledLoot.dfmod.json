@@ -1,12 +1,27 @@
 {
     "ModTitle": "Unleveled Loot",
-    "ModVersion": "0.1",
+    "ModVersion": "1.0.0",
     "ModAuthor": "Ralzar",
-    "DFUnity_Version": "0.10.26",
-    "ModDescription": "Makes loot not scale to your level.",
+    "ContactInfo": "https://forums.dfworkshop.net/",
+    "DFUnity_Version": "0.11.0",
+    "ModDescription": "Makes loot and shop stock materials not scale to your level.",
     "GUID": "1388308f-f430-4e43-8a9b-fa4d9b1fbbf6",
     "Files": [
         "Assets/Game/Mods/Unleveled Loot/UnleveledLoot.cs",
         "Assets/Game/Mods/Unleveled Loot/UnleveledLoot.dfmod.json"
+    ],
+    "Dependencies": [
+        {
+            "Name": "roleplayrealism",
+            "IsOptional": false,
+            "IsPeer": false,
+            "Version": "1.0.0"
+        },
+        {
+            "Name": "roleplayrealism-items",
+            "IsOptional": false,
+            "IsPeer": false,
+            "Version": "0.5.0"
+        }
     ]
 }
