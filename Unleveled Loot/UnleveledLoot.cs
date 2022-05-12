@@ -1,3 +1,8 @@
+// Project:         Unleveled Loot mod for Daggerfall Unity (http://www.dfworkshop.net)
+// Copyright:       Copyright (C) 2020 Ralzar
+// License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
+// Author:          Ralzar
+
 using DaggerfallConnect;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Entity;
@@ -9,16 +14,21 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using DaggerfallWorkshop.Game.Utility;
+using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
 
 namespace UnleveledLootMod
 {
     public class UnleveledLoot : MonoBehaviour
     {
         static Mod mod;
+
+        static bool orcishDrops = true;
+        static bool daedricDrops = true;
         static int luckMod;
         static int matRoll;
         static int region = 0;
         static int dungeon = 0;
+        static List<WeaponMaterialTypes> matSwitchList = new List<WeaponMaterialTypes>();
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -26,6 +36,25 @@ namespace UnleveledLootMod
             mod = initParams.Mod;
             var go = new GameObject(mod.Title);
             go.AddComponent<UnleveledLoot>();
+            ModSettings settings = mod.GetSettings();
+
+            matSwitchList.Add((WeaponMaterialTypes)settings.GetValue<int>("MaterialSwitching", "Iron"));
+            matSwitchList.Add((WeaponMaterialTypes)settings.GetValue<int>("MaterialSwitching", "Steel"));
+            matSwitchList.Add((WeaponMaterialTypes)settings.GetValue<int>("MaterialSwitching", "Silver"));
+            matSwitchList.Add((WeaponMaterialTypes)settings.GetValue<int>("MaterialSwitching", "Elven"));
+            matSwitchList.Add((WeaponMaterialTypes)settings.GetValue<int>("MaterialSwitching", "Dwarven"));
+            matSwitchList.Add((WeaponMaterialTypes)settings.GetValue<int>("MaterialSwitching", "Mithril"));
+            matSwitchList.Add((WeaponMaterialTypes)settings.GetValue<int>("MaterialSwitching", "Adamantium"));
+            matSwitchList.Add((WeaponMaterialTypes)settings.GetValue<int>("MaterialSwitching", "Ebony"));
+            matSwitchList.Add((WeaponMaterialTypes)settings.GetValue<int>("MaterialSwitching", "Orcish"));
+            matSwitchList.Add((WeaponMaterialTypes)settings.GetValue<int>("MaterialSwitching", "Daedric"));
+
+            Debug.Log("Steel setting = " + matSwitchList[(int)WeaponMaterialTypes.Steel].ToString());
+
+            orcishDrops = settings.GetValue<int>("MaterialSwitching", "Orcish") == (int)WeaponMaterialTypes.Orcish;
+            daedricDrops = settings.GetValue<int>("MaterialSwitching", "Daedric") == (int)WeaponMaterialTypes.Daedric;
+            Debug.Log("orcishDrops = " + orcishDrops.ToString());
+            Debug.Log("daedricDrops = " + daedricDrops.ToString());
         }
         
         void Awake()
@@ -52,7 +81,6 @@ namespace UnleveledLootMod
                 ArmorMaterialTypes material = ArmMatSelector();
                 return material;
             });
-
 
             mod.IsReady = true;
         }
@@ -107,11 +135,11 @@ namespace UnleveledLootMod
                     {
                         luckMod = GameManager.Instance.PlayerEntity.Stats.LiveLuck / 10;
 
-                        if (enemyEntity.MobileEnemy.Affinity == MobileAffinity.Daedra)
+                        if (enemyEntity.MobileEnemy.Affinity == MobileAffinity.Daedra && daedricDrops)
                         {
                             AddDaedric(entityBehaviour.CorpseLootContainer.Items, enemyEntity.MobileEnemy.ID);
                         }
-                        else if (enemyEntity.MobileEnemy.Team == MobileTeams.Orcs)
+                        else if (enemyEntity.MobileEnemy.Team == MobileTeams.Orcs && orcishDrops)
                         {
                             AddOrcish(entityBehaviour.CorpseLootContainer.Items, enemyEntity.MobileEnemy.ID);
                         }
@@ -161,16 +189,17 @@ namespace UnleveledLootMod
         {
             WeaponMaterialTypes weaponMaterial = WeaponMaterialTypes.Iron;
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideOpenShop)
-                weaponMaterial = shopMat();
+                weaponMaterial = ShopMat();
             else
-                weaponMaterial = randomMat();
+                weaponMaterial = RandomMat();
+
+            weaponMaterial = MaterialSwitch(weaponMaterial);
 
             return weaponMaterial;
         }
 
 
-
-        private static WeaponMaterialTypes randomMat()
+        private static WeaponMaterialTypes RandomMat()
         {
             WeaponMaterialTypes weaponMaterial = WeaponMaterialTypes.Iron;
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon)
@@ -257,12 +286,12 @@ namespace UnleveledLootMod
             return 0;
         }
 
-        private static WeaponMaterialTypes shopMat()
+        private static WeaponMaterialTypes ShopMat()
         {
             WeaponMaterialTypes weaponMaterial = WeaponMaterialTypes.Steel;
             int region = GameManager.Instance.PlayerGPS.CurrentRegionIndex;
-            int shopQuality = GameManager.Instance.PlayerEnterExit.Interior.BuildingData.Quality;
-            matRoll = (matRoll - 35) + (shopQuality * 2);
+            int shopLevel = ShopLevel();
+            matRoll = (matRoll - 35) + (shopLevel * 8);
 
             //increased chance of orcish when in orsinium
             if ((region == (int)DaggerfallRegions.OrsiniumArea) && (matRoll) > 70)
@@ -303,9 +332,32 @@ namespace UnleveledLootMod
             return weaponMaterial;
         }
 
+        private static int ShopLevel()
+        {
+            int shopQuality = GameManager.Instance.PlayerEnterExit.Interior.BuildingData.Quality;
+            int shopLevel = 1;
+
+            if (shopQuality > 16)
+                shopLevel = 5;
+            else if (shopQuality > 12)
+                shopLevel = 4;
+            else if (shopQuality > 8)
+                shopLevel = 3;
+            else if (shopQuality > 4)
+                shopLevel = 2;
+
+            return shopLevel;
+        }
+
+        private static WeaponMaterialTypes MaterialSwitch(WeaponMaterialTypes material)
+        {
+            return matSwitchList[(int)material];
+        }
+
 
         private static void AddDaedric(ItemCollection loot, int enemyEntityID)
         {
+            PlayerEntity playerEntity = GameManager.Instance.PlayerEntity;
             int roll = UnityEngine.Random.Range(0, 101) + (luckMod - 5);
             bool addDaedricItem = false;
             if ((enemyEntityID == (int)MobileTypes.DaedraLord && roll > 70)
@@ -330,8 +382,7 @@ namespace UnleveledLootMod
                 }
                 else
                 {
-                    Armor armor = (Armor)UnityEngine.Random.Range((int)Armor.Cuirass, (int)Armor.Tower_Shield + 1);
-                    item = ItemBuilder.CreateItem(ItemGroups.Armor, (int)armor);
+                    item = ItemBuilder.CreateRandomArmor(playerEntity.Level, playerEntity.Gender, playerEntity.Race);
                     ItemBuilder.ApplyArmorMaterial(item, ArmorMaterialTypes.Daedric);
                     item.currentCondition = (int)(UnityEngine.Random.Range(0.3f, 0.75f) * item.maxCondition);
                     loot.AddItem(item);
@@ -341,6 +392,7 @@ namespace UnleveledLootMod
 
         private static void AddOrcish(ItemCollection loot, int enemyEntityID)
         {
+            PlayerEntity playerEntity = GameManager.Instance.PlayerEntity;
             int roll = UnityEngine.Random.Range(0, 101) + (luckMod - 5);
             bool addOrcishItem = false;
             if ((enemyEntityID == (int)MobileTypes.OrcWarlord && roll > 80)
@@ -365,8 +417,7 @@ namespace UnleveledLootMod
                 }
                 else
                 {
-                    Armor armor = (Armor)UnityEngine.Random.Range((int)Armor.Cuirass, (int)Armor.Tower_Shield + 1);
-                    item = ItemBuilder.CreateItem(ItemGroups.Armor, (int)armor);
+                    item = ItemBuilder.CreateRandomArmor(playerEntity.Level, playerEntity.Gender, playerEntity.Race);
                     ItemBuilder.ApplyArmorMaterial(item, ArmorMaterialTypes.Orcish);
                     item.currentCondition = (int)(UnityEngine.Random.Range(0.3f, 0.75f) * item.maxCondition);
                     loot.AddItem(item);
